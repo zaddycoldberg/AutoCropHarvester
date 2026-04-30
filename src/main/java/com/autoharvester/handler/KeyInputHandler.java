@@ -17,9 +17,7 @@ public class KeyInputHandler {
 
         if (KeyBindings.KEY_TOGGLE.isPressed()) {
             SnakeEngine.get().toggle();
-            String msg = SnakeEngine.get().isActive()
-                    ? "§aAuto Harvester: §lON"
-                    : "§cAuto Harvester: §lOFF";
+            String msg = SnakeEngine.get().isActive() ? "§aHarvester: ON" : "§cHarvester: OFF";
             mc.thePlayer.addChatMessage(new ChatComponentText(msg));
         }
 
@@ -31,11 +29,11 @@ public class KeyInputHandler {
             SnakeEngine engine = SnakeEngine.get();
             if (engine.isAngleLocked()) {
                 engine.unlockAngle();
-                mc.thePlayer.addChatMessage(new ChatComponentText("§eAngle: §lUNLOCKED"));
+                mc.thePlayer.addChatMessage(new ChatComponentText("§eAngle: UNLOCKED"));
             } else {
                 engine.lockCurrentAngle();
                 mc.thePlayer.addChatMessage(new ChatComponentText(
-                    String.format("§bAngle locked: §l%.1f°", engine.getLockedYaw())));
+                    String.format("§bAngle locked: %.1f", engine.getLockedYaw())));
             }
         }
     }
