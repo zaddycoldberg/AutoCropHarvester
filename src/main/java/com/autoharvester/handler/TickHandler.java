@@ -1,8 +1,8 @@
 package com.autoharvester.handler;
 
 import com.autoharvester.core.SnakeEngine;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.client.Minecraft;
 
 public class TickHandler {
