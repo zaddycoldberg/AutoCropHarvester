@@ -26,41 +26,11 @@ minecraft {
 }
 
 repositories {
-    mavenLocal()
-    maven { url 'https://maven.minecraftforge.net' }
-    maven { url 'https://libraries.minecraft.net' }
     mavenCentral()
 }
 
 jar {
     manifest {
         attributes 'FMLCorePluginContainsFMLMod': 'true'
-    }
-}
-
-// ForgeGradle CI workaround: directly add ALL forge jars to compile classpath
-afterEvaluate {
-    def forgeVer = '1.8.9-11.15.1.2318-1.8.9'
-    def mcForgeCache = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}")
-
-    // Main deobfuscated MC+Forge jar
-    def forgeBin = new File(mcForgeCache, "stable/22/forgeBin-${forgeVer}.jar")
-    if (forgeBin.exists()) {
-        logger.lifecycle("CI fix: forgeBin -> ${forgeBin.length()} bytes")
-        compileJava.classpath += project.files(forgeBin)
-    }
-
-    // Forge Universal JAR (contains FML + Forge with original class names)
-    def forgeUniversal = new File("/tmp/forge-classpath/forge-universal.jar")
-    if (forgeUniversal.exists()) {
-        logger.lifecycle("CI fix: forge-universal -> ${forgeUniversal.length()} bytes")
-        compileJava.classpath += project.files(forgeUniversal)
-    }
-
-    // userdev classes
-    def userdevClasses = new File(mcForgeCache, "userdev/classes.jar")
-    if (userdevClasses.exists()) {
-        logger.lifecycle("CI fix: userdev/classes.jar -> ${userdevClasses.length()} bytes")
-        compileJava.classpath += project.files(userdevClasses)
     }
 }
