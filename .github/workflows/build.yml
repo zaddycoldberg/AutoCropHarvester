@@ -12,14 +12,22 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
-      - name: Setup Gradle
+      - name: Install Gradle 2.14
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '7.6.4'
-      - name: Build Mod
-        run: gradle build --no-daemon
-        timeout-minutes: 30
-      - uses: actions/upload-artifact@v4
-        with:
-          name: AutoCropHarvester-JAR
-          path: build/libs/*.jar
+          gradle-version: '2.14'
+      - name: Setup CI Workspace
+        run: gradle setupCIWorkspace --no-daemon
+        timeout-minutes: 20
+      - name: Find forgeBin jar
+        run: |
+          echo "=== ~/.gradle/caches/minecraft structure ==="
+          find ~/.gradle/caches/minecraft -name "*.jar" 2>/dev/null | sort
+          echo "=== forgeBin specifically ==="
+          find ~/.gradle -name "forgeBin*" 2>/dev/null
+      - name: Build
+        run: gradle build --no-daemon --info 2>&1 | grep -A2 "classpath\|compileJava\|forgeBin\|SKIPPED\|FAILED\|error:" | head -50
+        continue-on-error: true
+      - name: Show compile errors
+        run: gradle build --no-daemon 2>&1 | tail -40
+        continue-on-error: true
