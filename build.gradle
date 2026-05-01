@@ -46,23 +46,21 @@ afterEvaluate {
     // Main deobfuscated MC+Forge jar
     def forgeBin = new File(mcForgeCache, "stable/22/forgeBin-${forgeVer}.jar")
     if (forgeBin.exists()) {
-        logger.lifecycle("CI fix: Adding forgeBin: ${forgeBin}")
+        logger.lifecycle("CI fix: forgeBin -> ${forgeBin.length()} bytes")
         compileJava.classpath += project.files(forgeBin)
     }
 
-    // FML and Forge-added classes (not patched into MC, but added by Forge)
-    def userdevClasses = new File(mcForgeCache, "userdev/classes.jar")
-    if (userdevClasses.exists()) {
-        logger.lifecycle("CI fix: Adding userdev classes: ${userdevClasses}")
-        compileJava.classpath += project.files(userdevClasses)
+    // Forge Universal JAR (contains FML + Forge with original class names)
+    def forgeUniversal = new File("/tmp/forge-classpath/forge-universal.jar")
+    if (forgeUniversal.exists()) {
+        logger.lifecycle("CI fix: forge-universal -> ${forgeUniversal.length()} bytes")
+        compileJava.classpath += project.files(forgeUniversal)
     }
 
-    // Also add all jars in the userdev directory
-    def userdevDir = new File(mcForgeCache, "userdev")
-    if (userdevDir.exists()) {
-        userdevDir.listFiles().findAll { it.name.endsWith(".jar") }.each { jar ->
-            logger.lifecycle("CI fix: Adding userdev jar: ${jar}")
-            compileJava.classpath += project.files(jar)
-        }
+    // userdev classes
+    def userdevClasses = new File(mcForgeCache, "userdev/classes.jar")
+    if (userdevClasses.exists()) {
+        logger.lifecycle("CI fix: userdev/classes.jar -> ${userdevClasses.length()} bytes")
+        compileJava.classpath += project.files(userdevClasses)
     }
 }
