@@ -16,31 +16,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '2.14'
-      - name: Download Forge Universal JAR
-        run: |
-          FORGE_VERSION="1.8.9-11.15.1.2318-1.8.9"
-          mkdir -p /tmp/forge-classpath
-          curl -L -o /tmp/forge-classpath/forge-universal.jar \
-            "https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VERSION}/forge-${FORGE_VERSION}-universal.jar"
-          echo "Forge-universal jar size: $(wc -c < /tmp/forge-classpath/forge-universal.jar)"
-          echo "FML classes in universal jar:"
-          jar tf /tmp/forge-classpath/forge-universal.jar | grep "cpw/mods/fml/common/Mod" | head -5
-      - name: Setup CI Workspace
-        run: gradle setupCIWorkspace --no-daemon
-        timeout-minutes: 20
-      - name: Debug - Check forgeBin contents
-        run: |
-          FORGEBIN="/home/runner/.gradle/caches/minecraft/net/minecraftforge/forge/1.8.9-11.15.1.2318-1.8.9/stable/22/forgeBin-1.8.9-11.15.1.2318-1.8.9.jar"
-          echo "forgeBin size: $(wc -c < $FORGEBIN)"
-          echo "FML classes in forgeBin:"
-          jar tf "$FORGEBIN" | grep "cpw/mods/fml/common/Mod" | head -5
-          echo "Minecraft classes in forgeBin:"
-          jar tf "$FORGEBIN" | grep "net/minecraft/client/Minecraft" | head -3
-          echo "Total classes in forgeBin:"
-          jar tf "$FORGEBIN" | grep "\.class$" | wc -l
-      - name: Build Mod
-        run: gradle build --no-daemon
-        timeout-minutes: 15
+          cache-disabled: true
+      - name: Setup Decopm Workspace and Build
+        run: gradle setupDecompWorkspace build --no-daemon
+        timeout-minutes: 50
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCropHarvester-JAR
