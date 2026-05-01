@@ -38,14 +38,31 @@ jar {
     }
 }
 
-// ForgeGradle CI workaround: directly add forgeBin to compile classpath
+// ForgeGradle CI workaround: directly add ALL forge jars to compile classpath
 afterEvaluate {
     def forgeVer = '1.8.9-11.15.1.2318-1.8.9'
-    def forgeBin = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}/stable/22/forgeBin-${forgeVer}.jar")
+    def mcForgeCache = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}")
+
+    // Main deobfuscated MC+Forge jar
+    def forgeBin = new File(mcForgeCache, "stable/22/forgeBin-${forgeVer}.jar")
     if (forgeBin.exists()) {
-        logger.lifecycle("CI fix: Adding forgeBin to classpath from ${forgeBin}")
+        logger.lifecycle("CI fix: Adding forgeBin: ${forgeBin}")
         compileJava.classpath += project.files(forgeBin)
-    } else {
-        logger.warn("CI fix: forgeBin not found at ${forgeBin}")
+    }
+
+    // FML and Forge-added classes (not patched into MC, but added by Forge)
+    def userdevClasses = new File(mcForgeCache, "userdev/classes.jar")
+    if (userdevClasses.exists()) {
+        logger.lifecycle("CI fix: Adding userdev classes: ${userdevClasses}")
+        compileJava.classpath += project.files(userdevClasses)
+    }
+
+    // Also add all jars in the userdev directory
+    def userdevDir = new File(mcForgeCache, "userdev")
+    if (userdevDir.exists()) {
+        userdevDir.listFiles().findAll { it.name.endsWith(".jar") }.each { jar ->
+            logger.lifecycle("CI fix: Adding userdev jar: ${jar}")
+            compileJava.classpath += project.files(jar)
+        }
     }
 }
