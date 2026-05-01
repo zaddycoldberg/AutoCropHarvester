@@ -37,3 +37,15 @@ jar {
         attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }
+
+// ForgeGradle CI workaround: directly add forgeBin to compile classpath
+afterEvaluate {
+    def forgeVer = '1.8.9-11.15.1.2318-1.8.9'
+    def forgeBin = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}/stable/22/forgeBin-${forgeVer}.jar")
+    if (forgeBin.exists()) {
+        logger.lifecycle("CI fix: Adding forgeBin to classpath from ${forgeBin}")
+        compileJava.classpath += project.files(forgeBin)
+    } else {
+        logger.warn("CI fix: forgeBin not found at ${forgeBin}")
+    }
+}
