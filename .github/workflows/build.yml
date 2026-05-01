@@ -16,18 +16,33 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '2.14'
-      - name: Setup CI Workspace
+      - name: Setup CI Workspace (downloads and deobfuscates Minecraft+Forge)
         run: gradle setupCIWorkspace --no-daemon
         timeout-minutes: 20
-      - name: Find forgeBin jar
+      - name: Publish forgeBin to local Maven repository
         run: |
-          echo "=== ~/.gradle/caches/minecraft structure ==="
-          find ~/.gradle/caches/minecraft -name "*.jar" 2>/dev/null | sort
-          echo "=== forgeBin specifically ==="
-          find ~/.gradle -name "forgeBin*" 2>/dev/null
-      - name: Build
-        run: gradle build --no-daemon --info 2>&1 | grep -A2 "classpath\|compileJava\|forgeBin\|SKIPPED\|FAILED\|error:" | head -50
-        continue-on-error: true
-      - name: Show compile errors
-        run: gradle build --no-daemon 2>&1 | tail -40
-        continue-on-error: true
+          FORGE_VERSION="1.8.9-11.15.1.2318-1.8.9"
+          FORGEBIN_JAR="$HOME/.gradle/caches/minecraft/net/minecraftforge/forge/${FORGE_VERSION}/stable/22/forgeBin-${FORGE_VERSION}.jar"
+          LOCAL_DIR="$HOME/.m2/repository/net/minecraftforge/forgeBin/${FORGE_VERSION}"
+          mkdir -p "$LOCAL_DIR"
+          cp "$FORGEBIN_JAR" "${LOCAL_DIR}/forgeBin-${FORGE_VERSION}.jar"
+          echo "Copied forgeBin to $LOCAL_DIR"
+          cat > "${LOCAL_DIR}/forgeBin-${FORGE_VERSION}.pom" << 'POMEOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>net.minecraftforge</groupId>
+            <artifactId>forgeBin</artifactId>
+            <version>1.8.9-11.15.1.2318-1.8.9</version>
+            <packaging>jar</packaging>
+          </project>
+          POMEOF
+          echo "Created POM file"
+          ls -la "$LOCAL_DIR"
+      - name: Build Mod
+        run: gradle build --no-daemon
+        timeout-minutes: 15
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoCropHarvester-JAR
+          path: build/libs/*.jar
