@@ -16,12 +16,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '2.14'
-      - name: Setup Forge
-        run: gradle setupDecompWorkspace --no-daemon
-        timeout-minutes: 30
-      - name: Build
-        run: gradle build --no-daemon
-        timeout-minutes: 15
+      - name: Setup Forge and Build
+        run: gradle setupDecompWorkspace build --no-daemon
+        timeout-minutes: 45
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCropHarvester-JAR
