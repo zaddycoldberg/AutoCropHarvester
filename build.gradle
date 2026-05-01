@@ -1,38 +1,36 @@
-plugins {
-    id 'java'
-    id 'com.gtnewhorizons.retrofuturagradle' version '1.3.31'
+buildscript {
+    repositories {
+        maven { url "https://maven.minecraftforge.net" }
+        maven { url "https://maven.minecraftforge.net/legacy" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
 }
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'java'
 
 group = 'com.autoharvester'
 version = '1.0.0'
 archivesBaseName = 'AutoCropHarvester'
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 minecraft {
-    mcVersion = '1.8.9'
-    mcpMappingChannel = 'stable'
-    mcpMappingVersion = '22'
+    version = '1.8.9-11.15.1.2318-1.8.9'
+    runDir = 'run'
+    mappings = 'stable_22'
 }
 
 repositories {
-    maven { url 'https://maven.minecraftforge.net' }
-    maven { url 'https://maven.minecraftforge.net/legacy' }
     mavenCentral()
-}
-
-dependencies {
-    implementation rfg.deobf('net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9:universal')
 }
 
 jar {
     manifest {
-        attributes('FMLCorePluginContainsFMLMod': 'true')
+        attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }
