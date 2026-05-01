@@ -12,13 +12,14 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
-      - name: Install Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '2.14'
-      - name: Setup and Build (single Gradle call)
-        run: gradle setupCIWorkspace build --no-daemon
-        timeout-minutes: 45
+      - name: Download Gradle Wrapper JAR
+        run: |
+          curl -L -o gradle/wrapper/gradle-wrapper.jar \
+            "https://github.com/gradle/gradle/raw/v7.6.4/gradle/wrapper/gradle-wrapper.jar"
+          chmod +x gradlew
+      - name: Build Mod
+        run: ./gradlew build --no-daemon
+        timeout-minutes: 30
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCropHarvester-JAR
