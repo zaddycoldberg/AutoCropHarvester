@@ -12,13 +12,12 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
-      - name: Download Gradle Wrapper JAR
-        run: |
-          curl -L -o gradle/wrapper/gradle-wrapper.jar \
-            "https://github.com/gradle/gradle/raw/v7.6.4/gradle/wrapper/gradle-wrapper.jar"
-          chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '7.6.4'
       - name: Build Mod
-        run: ./gradlew build --no-daemon
+        run: gradle build --no-daemon
         timeout-minutes: 30
       - uses: actions/upload-artifact@v4
         with:
