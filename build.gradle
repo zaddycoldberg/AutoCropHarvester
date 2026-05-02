@@ -5,24 +5,24 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'java'
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "java"
 
-group = 'com.autoharvester'
-version = '1.0.0'
-archivesBaseName = 'AutoCropHarvester'
+group = "com.autoharvester"
+version = "1.0.0"
+archivesBaseName = "AutoCropHarvester"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = '1.8.9-11.15.1.2318-1.8.9'
-    runDir = 'run'
-    mappings = 'stable_22'
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
 }
 
 repositories {
@@ -30,21 +30,27 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: '/tmp/forge-classpath', include: '*.jar')
 }
 
 jar {
     manifest {
-        attributes 'FMLCorePluginContainsFMLMod': 'true'
+        attributes "FMLCorePluginContainsFMLMod": "true"
     }
 }
 
-// CI workaround: add forgeBin (deobf MC) to classpath
+// CI workaround: ForgeGradle writes jars to local cache but Maven resolution fails remotely.
+// We manually locate and add the dev jar to the compile classpath after setup runs.
 afterEvaluate {
-    def forgeVer = '1.8.9-11.15.1.2318-1.8.9'
-    def forgeBin = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}/stable/22/forgeBin-${forgeVer}.jar")
-    if (forgeBin.exists()) {
-        logger.lifecycle("CI: Adding forgeBin (${forgeBin.length()} bytes)")
-        compileJava.classpath += project.files(forgeBin)
+    def forgeVer = "1.8.9-11.15.1.2318-1.8.9"
+    def cacheBase = new File("${System.getProperty('user.home')}/.gradle/caches/minecraft/net/minecraftforge/forge/${forgeVer}/stable/22")
+    def jarsToAdd = ["forgeDev", "forgeBin"].collect { name ->
+        new File(cacheBase, "${name}-${forgeVer}.jar")
+    }.findAll { it.exists() }
+    jarsToAdd.each { jar ->
+        logger.lifecycle("CI classpath: adding ${jar.name} (${jar.length()} bytes)")
+        compileJava.classpath += project.files(jar)
+    }
+    if (jarsToAdd.isEmpty()) {
+        logger.lifecycle("CI classpath: no forgeDev/forgeBin found yet (expected if setup not run)")
     }
 }
