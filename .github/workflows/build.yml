@@ -6,32 +6,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '8'
-          distribution: 'temurin'
+          java-version: "8"
+          distribution: "temurin"
       - name: Install Gradle 2.14
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '2.14'
+          gradle-version: "2.14"
           cache-disabled: true
-      - name: Download Forge Universal JAR (FML classes)
+      - name: Setup Decompile Workspace and Build (single invocation)
         run: |
-          FORGE_VER="1.8.9-11.15.1.2318-1.8.9"
-          mkdir -p /tmp/forge-classpath
-          curl -L -o /tmp/forge-classpath/forge-universal.jar \
-            "https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VER}/forge-${FORGE_VER}-universal.jar"
-          echo "forge-universal: $(wc -c < /tmp/forge-classpath/forge-universal.jar) bytes"
-          jar tf /tmp/forge-classpath/forge-universal.jar | grep "net/minecraftforge/fml/common/Mod.class" || echo "WARNING: Mod.class not found"
-      - name: Setup CI Workspace
-        run: gradle setupCIWorkspace --no-daemon
-        timeout-minutes: 20
-      - name: Build Mod
-        run: gradle build --no-daemon
-        timeout-minutes: 15
+          gradle setupDecompWorkspace build --no-daemon
+        timeout-minutes: 40
+      - name: List generated jars
+        if: always()
+        run: find build/libs -name "*.jar" 2>/dev/null || echo "No jars found"
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: AutoCropHarvester-JAR
           path: build/libs/*.jar
