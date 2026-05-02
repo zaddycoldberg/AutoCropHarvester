@@ -17,9 +17,20 @@ jobs:
         with:
           gradle-version: '2.14'
           cache-disabled: true
-      - name: Setup Decopm Workspace and Build
-        run: gradle setupDecompWorkspace build --no-daemon
-        timeout-minutes: 50
+      - name: Download Forge Universal JAR (FML classes)
+        run: |
+          FORGE_VER="1.8.9-11.15.1.2318-1.8.9"
+          mkdir -p /tmp/forge-classpath
+          curl -L -o /tmp/forge-classpath/forge-universal.jar \
+            "https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VER}/forge-${FORGE_VER}-universal.jar"
+          echo "forge-universal: $(wc -c < /tmp/forge-classpath/forge-universal.jar) bytes"
+          jar tf /tmp/forge-classpath/forge-universal.jar | grep "net/minecraftforge/fml/common/Mod.class" || echo "WARNING: Mod.class not found"
+      - name: Setup CI Workspace
+        run: gradle setupCIWorkspace --no-daemon
+        timeout-minutes: 20
+      - name: Build Mod
+        run: gradle build --no-daemon
+        timeout-minutes: 15
       - uses: actions/upload-artifact@v4
         with:
           name: AutoCropHarvester-JAR
